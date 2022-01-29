@@ -1,1 +1,1 @@
-# teamGeneratR
+# teamGenerator
