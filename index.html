@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script src="https://unpkg.com/read-excel-file@4.x/bundle/read-excel-file.min.js"></script>
+        <title>teamGeneratR</title>
+    </head>
+    <body>
+        <input type="file" id="input">
+        <table id="tbl-data"></table>
+        <p id="output"></p>
+
+        <script>
+
+            function factorial(x) {
+                if(x == 0) {
+                    return 1;
+                }
+                if(x < 0 ) {
+                    return undefined;
+                }
+                for(var i = x; --i; ) {
+                    x *= i;
+                }
+                return x;
+            }
+            
+            var input = document.getElementById('input')
+            input.addEventListener('change', function() {
+                readXlsxFile(input.files[0]).then(function(data) {
+                    // console.log(data)
+                    if (data[0].length == 1) { //If no value
+                        document.getElementById('output').innerHTML = "Error: No values added"
+                    } else if (data[0].length == 2) { //If one
+
+                    } else { // If more than one
+
+                        var combinations = [];
+                        const arr = Array.from({length: data.length - 1}, (_, i) => i + 1)
+                        var teamComp = []
+                        var matchups = []
+
+                        const permutations = (len, val, existing) => {
+                            if (len == 0) {
+                                combinations.push(val)
+                                return
+                            }
+                            for (let i=0; i<arr.length; i++) {
+                                if (!existing[i]) {
+                                    existing[i] = true
+                                    permutations(len-1, val+arr[i], existing)
+                                    existing[i] = false
+                                }
+                            }
+                        }
+                        const buildPermuations = (arr = []) => {
+                            for(let i=0; i < arr.length; i++) {
+                                permutations(arr.length-i, "", [])
+                            }
+                        }
+
+                        buildPermuations(arr)
+                        combinations.splice(0, factorial(data.length - 1))
+                        console.log(combinations)
+
+                        for (let i of combinations) {
+                            var layoutNumbers = i.split('')
+                            // console.log('layoutNumbers: ' + layoutNumbers)
+                            var layoutNames = []
+                            var powerLevel = 0
+
+                            for (let k in layoutNumbers) {
+                                powerLevel = data[layoutNumbers[k]][Number(k) + 1] + powerLevel
+                                layoutNames.push(data[Number(layoutNumbers[k])][0])
+                                // console.log(' ' + k + ' ' + data[Number(layoutNumbers[k])][0]+ ': ' + data[Number(layoutNumbers[k])][Number(k)+1])
+                            }
+                            layoutNames.push(powerLevel)
+                            teamComp.push(layoutNames)
+                        }
+                        console.log(teamComp)
+                        while (teamComp.length > 1) {
+                            var matchup = []
+                            matchup.push(teamComp.pop())
+                            matchup.push(teamComp.shift())
+                            matchup.push(Math.abs(matchup[0][matchup[0].length-1] - matchup[1][matchup[1].length-1]))
+                            matchups.push(matchup)
+                        }
+                        console.log(matchups)
+                        // matchups = matchups.sort(function(a, b) {
+                        //     return b[2] - a[2]
+                        // })
+                        // console.log(matchups)
+
+                    }
+                })
+            })
+        </script>
+    </body>
+</html>
